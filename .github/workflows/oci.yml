@@ -42,12 +42,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to Clinia Harbor
-        uses: docker/login-action@v3
-        with:
-          registry: oci.clinia.dev
-          username: ${{ secrets.CLINIA_HARBOR_USER }}
-          password: ${{ secrets.CLINIA_HARBOR_PASSWORD }}
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v5
@@ -100,12 +94,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to Clinia Harbor
-        uses: docker/login-action@v3
-        with:
-          registry: oci.clinia.dev
-          username: ${{ secrets.CLINIA_HARBOR_USER }}
-          password: ${{ secrets.CLINIA_HARBOR_PASSWORD }}
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
