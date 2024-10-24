@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lus/kratos-readonly-traits/internal/static"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/lus/kratos-readonly-traits/internal/static"
+	"github.com/rs/zerolog/log"
 )
 
 func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 	// Retrieve the schema data
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Error().Msg(fmt.Sprintf("Failed to get schema: %s\nWith error: %s", url, err.Error()))
 		return nil, err
 	}
 	body, err := io.ReadAll(resp.Body)
