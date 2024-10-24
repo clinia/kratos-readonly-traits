@@ -2,8 +2,6 @@ name: Kratos Readonly Traits - Build Containers
 
 on:
   push:
-    branches:
-      - main
     tags:
       - v*
 
