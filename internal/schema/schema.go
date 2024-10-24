@@ -14,9 +14,10 @@ import (
 
 func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 	// Retrieve the schema data
+	log.Info().Msg(fmt.Sprintf("Getting schema: %s", url))
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Error().Msg(fmt.Sprintf("Failed to get schema: %s\nWith error: %s", url, err.Error()))
+		log.Error().Msg(fmt.Sprintf("Failed to get schema with error: %s", err.Error()))
 		return nil, err
 	}
 	body, err := io.ReadAll(resp.Body)
