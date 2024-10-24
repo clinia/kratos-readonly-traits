@@ -2,10 +2,12 @@ package webhook
 
 import (
 	"encoding/json"
-	"github.com/lus/kratos-readonly-traits/internal/schema"
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/lus/kratos-readonly-traits/internal/schema"
+	"github.com/rs/zerolog/log"
 )
 
 type requestPayload struct {
@@ -34,6 +36,7 @@ type controller struct {
 }
 
 func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Request) {
+	log.Info().Msg(fmt.Sprintf("Request Received: %s", request.Method))
 	if request.Method != http.MethodPost {
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		writer.Write([]byte("method not allowed"))
@@ -54,6 +57,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	log.Info().Msg("Request parsed")
 	traits, err := schema.ExtractReadOnlyTraits(data.SchemaURL)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -61,6 +65,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	log.Info().Msg(fmt.Sprintf("Traits extracted: %d", len(traits)))
 	response := &responsePayload{
 		Messages: make([]responseTopMessage, 0, len(traits)),
 	}
@@ -94,6 +99,8 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 			})
 		}
 	}
+	log.Info().Msg(fmt.Sprintf("Traits analysed: %d", len(response.Messages)))
+
 	if len(response.Messages) > 0 {
 		responseData, err := json.Marshal(response)
 		if err != nil {
@@ -107,4 +114,6 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	writer.WriteHeader(http.StatusOK)
+	log.Info().Msg("Response treated")
+
 }
