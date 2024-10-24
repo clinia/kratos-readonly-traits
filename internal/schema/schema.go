@@ -25,10 +25,12 @@ func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Error().Msg(fmt.Sprintf("Failed to get schema (%d) with body: %s", resp.StatusCode, string(body[:])))
 		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(body))
 	}
 
 	// Extract the traits
+	log.Info().Msg("Extracting traits...")
 	var schema map[string]any
 	if err := json.Unmarshal(body, &schema); err != nil {
 		return nil, err
@@ -38,6 +40,7 @@ func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 		return nil, errors.New("traits object missing from schema")
 	}
 
+	log.Info().Msg(fmt.Sprintf("Traits: %+v", traits))
 	// Extract the readonly state for every trait
 	traitStates := make(map[string]bool, len(traits))
 	for trait, rawValues := range traits {
