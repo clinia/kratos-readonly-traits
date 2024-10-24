@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/lus/kratos-readonly-traits/internal/static"
@@ -49,6 +50,21 @@ func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 		traitStates[trait] = readonly
 	}
 	return traitStates, nil
+}
+
+func AppendDotToDomain(rawURL string) (string, error) {
+	// Parse the URL
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
+		return "", err
+	}
+
+	// Append a dot to the host
+	parsedURL.Host += "."
+
+	// Rebuild the modified URL
+	return parsedURL.String(), nil
 }
 
 func extractNestedValue[T any](structure map[string]any, key string) (T, bool) {
