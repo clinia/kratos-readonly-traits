@@ -40,7 +40,7 @@ func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 		return nil, errors.New("traits object missing from schema")
 	}
 
-	log.Info().Msg(fmt.Sprintf("Traits length: %d", len(traits)))
+	log.Info().Msg(fmt.Sprintf("Traits: %+v", traits))
 	// Extract the readonly state for every trait
 	traitStates := make(map[string]bool, len(traits))
 	for trait, rawValues := range traits {
