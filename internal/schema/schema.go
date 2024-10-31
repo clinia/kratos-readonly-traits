@@ -17,30 +17,31 @@ func ExtractReadOnlyTraits(url string) (map[string]bool, error) {
 	log.Info().Msg(fmt.Sprintf("Getting schema: %s", url))
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Error().Msg(fmt.Sprintf("Failed to get schema with error: %s", err.Error()))
+		log.Error().Msg("Failed to get schema")
 		return nil, err
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Error().Msg("Failed to read schema")
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Error().Msg(fmt.Sprintf("Failed to get schema (%d) with body: %s", resp.StatusCode, string(body[:])))
+		log.Error().Msg(fmt.Sprintf("Failed to get schema with status: %d", resp.StatusCode))
 		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(body))
 	}
 
 	// Extract the traits
-	log.Info().Msg("Extracting traits...")
 	var schema map[string]any
 	if err := json.Unmarshal(body, &schema); err != nil {
+		log.Error().Msg("Failed to unmarshal schema")
 		return nil, err
 	}
 	traits, ok := extractNestedValue[map[string]any](schema, "properties.traits.properties")
 	if !ok {
+		log.Error().Msg("Traits object missing from schema")
 		return nil, errors.New("traits object missing from schema")
 	}
 
-	log.Info().Msg(fmt.Sprintf("Traits: %+v", traits))
 	// Extract the readonly state for every trait
 	traitStates := make(map[string]bool, len(traits))
 	for trait, rawValues := range traits {

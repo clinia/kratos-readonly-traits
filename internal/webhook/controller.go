@@ -36,15 +36,17 @@ type controller struct {
 }
 
 func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Request) {
-	log.Info().Msg(fmt.Sprintf("Request Received: %s", request.Method))
 	if request.Method != http.MethodPost {
+		log.Error().Msg(fmt.Sprintf("Method not allowed: %s", request.Method))
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		writer.Write([]byte("method not allowed"))
 		return
 	}
 
+	log.Info().Msg("Request for readonly traits received")
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
+		log.Error().Msg("Could not read request body")
 		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("could not read request body"))
 		return
@@ -52,12 +54,12 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 
 	data := new(requestPayload)
 	if err := json.Unmarshal(body, data); err != nil {
+		log.Error().Msg("Could not unmarshal request body")
 		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("could not unmarshal request body"))
 		return
 	}
 
-	log.Info().Msg("Request parsed")
 	traits, err := schema.ExtractReadOnlyTraits(data.SchemaURL)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -65,7 +67,6 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	log.Info().Msg(fmt.Sprintf("Traits extracted: %d", len(traits)))
 	response := &responsePayload{
 		Messages: make([]responseTopMessage, 0, len(traits)),
 	}
@@ -99,21 +100,22 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 			})
 		}
 	}
-	log.Info().Msg(fmt.Sprintf("Traits analysed: %d", len(response.Messages)))
 
 	if len(response.Messages) > 0 {
 		responseData, err := json.Marshal(response)
 		if err != nil {
+			log.Error().Msg("Could not marshal response")
 			writer.WriteHeader(http.StatusInternalServerError)
 			writer.Write([]byte(err.Error()))
 			return
 		}
+		log.Info().Msg("Read-only trait change detected, returning error")
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusConflict)
 		writer.Write(responseData)
 		return
 	}
+	log.Info().Msg("No read-only trait change detected, returning OK")
 	writer.WriteHeader(http.StatusOK)
-	log.Info().Msg("Response treated")
 
 }
