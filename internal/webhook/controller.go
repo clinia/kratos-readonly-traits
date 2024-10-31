@@ -119,3 +119,18 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 	writer.WriteHeader(http.StatusOK)
 
 }
+
+func (cnt *controller) LivenessAndReadiness(writer http.ResponseWriter, request *http.Request) {
+	if !(request.Method == http.MethodGet || request.Method == http.MethodHead) {
+		log.Error().Msg(fmt.Sprintf("Method not allowed: %s", request.Method))
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		writer.Write([]byte("method not allowed"))
+		return
+	}
+
+	log.Info().Msg("Request for liveness or readiness received")
+	writer.Header().Set("Content-Type", "text/plain")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte("."))
+
+}

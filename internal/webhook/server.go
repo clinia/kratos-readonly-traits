@@ -15,6 +15,7 @@ func (server *Server) Start() error {
 	cnt := &controller{
 		ErrorMessage: server.ErrorMessage,
 	}
+	http.HandleFunc("/healthz", cnt.LivenessAndReadiness)
 	http.HandleFunc("/", cnt.Endpoint)
 	httpServer := &http.Server{
 		Addr: server.Address,
