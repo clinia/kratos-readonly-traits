@@ -1,9 +1,11 @@
 name: Kratos Readonly Traits - Build Containers
 
 on:
-  push:
-    tags:
-      - v*
+  # TODO: restore to tag-only before merging
+  pull_request:
+  # push:
+  #   tags:
+  #     - v*
 
 env:
   KRATOS_READONLY_TRAITS_IMAGE: ghcr.io/clinia/kratos-readonly-traits
