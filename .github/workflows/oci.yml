@@ -14,10 +14,17 @@ jobs:
       fail-fast: true # In case one of the jobs fails, the other jobs will be cancelled
       matrix:
         arch:
-          [
-            { runs-on: buildjet-4vcpu-ubuntu-2204, platform: linux/amd64 },
-            { runs-on: buildjet-8vcpu-ubuntu-2204-arm, platform: linux/arm64 },
-          ]
+          - {
+              runs-on: buildjet-4vcpu-ubuntu-2204,
+              platform: linux/amd64,
+              platform-short: amd64,
+            }
+          - {
+              runs-on: buildjet-8vcpu-ubuntu-2204-arm,
+              platform: linux/arm64,
+              platform-short: arm64,
+            }
+
     name: Build - ${{matrix.arch.platform}}
     runs-on: ${{matrix.arch.runs-on}}
     steps:
@@ -60,7 +67,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests
+          name: digests-${{matrix.arch.platform-short}}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -73,8 +80,9 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          name: digests
+          pattern: digests*
           path: /tmp/digests
+          merge-multiple: true
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Docker meta
